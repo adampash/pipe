@@ -2,14 +2,13 @@ const isObj = data => typeof data === 'object' && !Array.isArray(data);
 export const objToArr = obj => Reflect.ownKeys(obj).map(k => [k, obj[k]]);
 const convertIfObj = data => (isObj(data) ? objToArr(data) : data);
 
-export const pipe = data => (...fns) =>
-  fns.reduce((acc, fn) => fn(acc), convertIfObj(data));
-
-export const pipeAsync = data => (...fns) =>
+export const pipe = data => (...fns) => fns.reduce((acc, fn) => fn(acc), data);
+pipe.async = data => (...fns) =>
   fns.reduce(
     (acc, fn) => Promise.resolve(acc).then(fn),
     Promise.resolve(convertIfObj(data))
   );
+pipe.obj = data => pipe(data)(objToArr, pipe);
 
 const asyncify = fnToAsync => fn => arr =>
   Promise.all(pipe(arr)(fnToAsync(fn)));
@@ -19,10 +18,8 @@ export const map = fn => arr => arr.map(fn);
 export const reduce = (fn, acc) => arr => arr.reduce(fn, acc);
 export const some = fn => arr => arr.some(fn);
 
-export const mapAsync = asyncify(map);
-export const filterAsync = asyncify(filter);
-export const reduceAsync = asyncify(reduce);
-export const someAsync = asyncify(some);
+// eslint-disable-next-line no-param-reassign
+[map, filter, reduce, some].forEach(fn => (fn.async = asyncify(fn)));
 
 // accepts an array of objects and merges them together.
 // mergeObjects([{foo: 'bar'}, {baz: 'bat'}])
@@ -35,5 +32,7 @@ export const log = data => {
   return data;
 };
 
+// TODO: Test which implementation below is faster
 export const intoObj = data =>
   pipe(data)(map(([k, v]) => ({ [k]: v })), mergeObjects);
+// pipe(data)(reduce((acc, [k, v]) => ({ ...acc, [k]: v }), {}));

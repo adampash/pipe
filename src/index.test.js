@@ -1,12 +1,4 @@
-import {
-  log,
-  pipe,
-  pipeAsync,
-  map,
-  mapAsync,
-  objToArr,
-  intoObj,
-} from './index';
+import { pipe, map, objToArr, intoObj } from './index';
 
 const add = x => y => x + y;
 const add1 = add(1);
@@ -16,12 +8,6 @@ const add3 = add(3);
 const asyncAdd = x => y => new Promise(resolve => resolve(x + y));
 const asyncAdd1 = asyncAdd(1);
 const asyncAdd2 = asyncAdd(2);
-
-describe('pipeAsync', () => {
-  it('pipes data through promises', async () => {
-    expect(await pipeAsync(1)(asyncAdd1, asyncAdd2, add3)).toEqual(7);
-  });
-});
 
 describe('pipe', () => {
   it('pipes data through functions', () => {
@@ -33,15 +19,19 @@ describe('pipe', () => {
       foo: 1,
       bar: 2,
     };
-    const result = pipe(obj)(map(([k, v]) => [k, add1(v)]), intoObj);
+    const result = pipe.obj(obj)(map(([k, v]) => [k, add1(v)]), intoObj);
 
     expect(result).toEqual({ foo: 2, bar: 3 });
   });
+
+  it('pipes data through promises', async () => {
+    expect(await pipe.async(1)(asyncAdd1, asyncAdd2, add3)).toEqual(7);
+  });
 });
 
-describe('mapAsync', () => {
+describe('map', () => {
   it('handles async functions in map', async () => {
-    const result = await mapAsync(asyncAdd1)([1, 2, 3]);
+    const result = await map.async(asyncAdd1)([1, 2, 3]);
     expect(result).toEqual([2, 3, 4]);
   });
 });
