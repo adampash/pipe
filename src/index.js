@@ -25,7 +25,7 @@ export const some = fn => arr => arr.some(fn);
 // mergeObjects([{foo: 'bar'}, {baz: 'bat'}])
 // > { foo: 'bar', baz: 'bat' }
 export const mergeObjects = arr =>
-  arr.length === 0 ? {} : Object.assign(...arr);
+  arr.length === 0 ? {} : Object.assign({}, ...arr);
 
 export const log = data => {
   console.log(`<${typeof data}>`, data);
