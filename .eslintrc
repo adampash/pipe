@@ -1,0 +1,19 @@
+{
+	"parser": "babel-eslint",
+		"extends": [
+			"airbnb",
+			"prettier"
+		],
+		"globals": {
+			"describe",
+			"expect",
+			"it",
+			"fit",
+			"xit",
+			"jasmine",
+			"beforeEach",
+			"beforeAll",
+			"afterAll"
+		}
+}
+
