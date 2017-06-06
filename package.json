@@ -8,11 +8,11 @@
   "scripts": {
     "test": "jest --watch",
     "precommit": "lint-staged",
-    "lint": "eslint ./src"
+    "lint": "./node_modules/.bin/eslint ./src"
   },
   "lint-staged": {
     "src/**/*.js": [
-      "eslint ./src --fix",
+      "./node_modules/.bin/eslint ./src --fix",
       "prettier --write --single-quote --trailing-comma es5",
       "git add"
     ]
