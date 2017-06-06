@@ -1,4 +1,12 @@
-import { pipe, pipeAsync, map, objToArr, intoObj } from './index';
+import {
+  log,
+  pipe,
+  pipeAsync,
+  map,
+  mapAsync,
+  objToArr,
+  intoObj,
+} from './index';
 
 const add = x => y => x + y;
 const add1 = add(1);
@@ -25,9 +33,16 @@ describe('pipe', () => {
       foo: 1,
       bar: 2,
     };
-    const result = pipe(obj)(map(([k, v]) => [k, add1(v)]));
+    const result = pipe(obj)(map(([k, v]) => [k, add1(v)]), intoObj);
 
-    expect(result).toEqual([['foo', 2], ['bar', 3]]);
+    expect(result).toEqual({ foo: 2, bar: 3 });
+  });
+});
+
+describe('mapAsync', () => {
+  it('handles async functions in map', async () => {
+    const result = await mapAsync(asyncAdd1)([1, 2, 3]);
+    expect(result).toEqual([2, 3, 4]);
   });
 });
 
