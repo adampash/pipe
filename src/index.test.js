@@ -19,7 +19,7 @@ describe('pipe', () => {
       foo: 1,
       bar: 2,
     };
-    const result = pipe.obj(obj)(map(([k, v]) => [k, add1(v)]), intoObj);
+    const result = pipe.objToArr(obj)(map(([k, v]) => [k, add1(v)]), intoObj);
 
     expect(result).toEqual({ foo: 2, bar: 3 });
   });

@@ -8,7 +8,8 @@ pipe.async = data => (...fns) =>
     (acc, fn) => Promise.resolve(acc).then(fn),
     Promise.resolve(convertIfObj(data))
   );
-pipe.obj = data => pipe(data)(objToArr, pipe);
+pipe.objToArr = data => pipe(data)(objToArr, pipe);
+pipe.async.objToArr = data => pipe(data)(objToArr, pipe.async);
 
 const asyncify = fnToAsync => fn => arr =>
   Promise.all(pipe(arr)(fnToAsync(fn)));
