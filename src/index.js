@@ -13,9 +13,13 @@ export const filter = fn => arr => arr.filter(fn);
 export const map = fn => arr => arr.map(fn);
 export const reduce = (fn, acc) => arr => arr.reduce(fn, acc);
 export const some = fn => arr => arr.some(fn);
+export const every = fn => arr => arr.every(fn);
+export const find = fn => arr => arr.find(fn);
 
 // eslint-disable-next-line no-param-reassign
-[map, filter, reduce, some].forEach(fn => (fn.async = asyncify(fn)));
+[map, filter, reduce, some, every, find].forEach(
+  fn => (fn.async = asyncify(fn))
+);
 
 // accepts an array of objects and merges them together.
 // mergeObjects([{foo: 'bar'}, {baz: 'bat'}])
