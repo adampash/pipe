@@ -1,6 +1,15 @@
+// Using Array.prototype.fn.call to accept more liberal input
+export const filter = fn => arr => Array.prototype.filter.call(arr, fn);
+export const map = fn => arr => Array.prototype.map.call(arr, fn);
+export const reduce = (fn, acc) => arr =>
+  Array.prototype.reduce.call(arr, fn, acc);
+export const some = fn => arr => Array.prototype.some.call(arr, fn);
+export const every = fn => arr => Array.prototype.every.call(arr, fn);
+export const find = fn => arr => Array.prototype.find.call(arr, fn);
+
 export const objToArr = obj => Reflect.ownKeys(obj).map(k => [k, obj[k]]);
 
-export const pipe = data => (...fns) => fns.reduce((acc, fn) => fn(acc), data);
+export const pipe = data => (...fns) => reduce((acc, fn) => fn(acc), data)(fns);
 pipe.async = data => (...fns) =>
   fns.reduce((acc, fn) => acc.then(fn), Promise.resolve(data));
 pipe.objToArr = data => pipe(data)(objToArr, pipe);
@@ -8,14 +17,6 @@ pipe.async.objToArr = data => pipe(data)(objToArr, pipe.async);
 
 const asyncify = fnToAsync => fn => arr =>
   Promise.all(pipe(arr)(fnToAsync(fn)));
-
-export const filter = fn => arr => arr.filter(fn);
-export const map = fn => arr => arr.map(fn);
-export const reduce = (fn, acc) => arr => arr.reduce(fn, acc);
-export const some = fn => arr => arr.some(fn);
-export const every = fn => arr => arr.every(fn);
-export const find = fn => arr => arr.find(fn);
-
 [map, filter, reduce, some, every, find].forEach(
   // eslint-disable-next-line no-param-reassign
   fn => (fn.async = asyncify(fn))
