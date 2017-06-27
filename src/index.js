@@ -2,7 +2,7 @@ export const objToArr = obj => Reflect.ownKeys(obj).map(k => [k, obj[k]]);
 
 export const pipe = data => (...fns) => fns.reduce((acc, fn) => fn(acc), data);
 pipe.async = data => (...fns) =>
-  fns.reduce((acc, fn) => Promise.resolve(acc).then(fn), Promise.resolve(data));
+  fns.reduce((acc, fn) => acc.then(fn), Promise.resolve(data));
 pipe.objToArr = data => pipe(data)(objToArr, pipe);
 pipe.async.objToArr = data => pipe(data)(objToArr, pipe.async);
 
@@ -16,8 +16,8 @@ export const some = fn => arr => arr.some(fn);
 export const every = fn => arr => arr.every(fn);
 export const find = fn => arr => arr.find(fn);
 
-// eslint-disable-next-line no-param-reassign
 [map, filter, reduce, some, every, find].forEach(
+  // eslint-disable-next-line no-param-reassign
   fn => (fn.async = asyncify(fn))
 );
 
