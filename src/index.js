@@ -7,6 +7,7 @@ export const some = fn => arr => Array.prototype.some.call(arr, fn);
 export const every = fn => arr => Array.prototype.every.call(arr, fn);
 export const find = fn => arr => Array.prototype.find.call(arr, fn);
 
+// turns an object into an array of [key, value] pairs to map/reduce over
 export const objToArr = obj => Reflect.ownKeys(obj).map(k => [k, obj[k]]);
 
 export const pipe = data => (...fns) => reduce((acc, fn) => fn(acc), data)(fns);
