@@ -1,27 +1,26 @@
-// Using Array.prototype.fn.call to accept more liberal input
-export const filter = fn => arr => Array.prototype.filter.call(arr, fn);
-export const map = fn => arr => Array.prototype.map.call(arr, fn);
-export const reduce = (fn, acc) => arr =>
-  Array.prototype.reduce.call(arr, fn, acc);
-export const some = fn => arr => Array.prototype.some.call(arr, fn);
-export const every = fn => arr => Array.prototype.every.call(arr, fn);
-export const find = fn => arr => Array.prototype.find.call(arr, fn);
-
-// turns an object into an array of [key, value] pairs to map/reduce over
 export const objToArr = obj => Reflect.ownKeys(obj).map(k => [k, obj[k]]);
 
-export const pipe = data => (...fns) => reduce((acc, fn) => fn(acc), data)(fns);
+export const pipe = data => (...fns) =>
+  fns.reduce((acc, fn) => (typeof fn === 'function' ? fn(acc) : acc), data);
+
 pipe.async = data => (...fns) =>
   fns.reduce((acc, fn) => acc.then(fn), Promise.resolve(data));
+
 pipe.objToArr = data => pipe(data)(objToArr, pipe);
 pipe.async.objToArr = data => pipe(data)(objToArr, pipe.async);
 
 const asyncify = fnToAsync => fn => arr =>
   Promise.all(pipe(arr)(fnToAsync(fn)));
-[map, filter, reduce, some, every, find].forEach(
-  // eslint-disable-next-line no-param-reassign
-  fn => (fn.async = asyncify(fn))
-);
+
+export const filter = fn => arr => arr.filter(fn);
+export const map = fn => arr => arr.map(fn);
+export const reduce = (fn, acc) => arr => arr.reduce(fn, acc);
+export const some = fn => arr => arr.some(fn);
+export const find = fn => arr => arr.find(fn);
+export const forEach = fn => arr => arr.forEach(fn);
+
+// eslint-disable-next-line no-param-reassign
+[map, filter, reduce, some, find].forEach(fn => (fn.async = asyncify(fn)));
 
 // accepts an array of objects and merges them together.
 // mergeObjects([{foo: 'bar'}, {baz: 'bat'}])
@@ -29,8 +28,8 @@ const asyncify = fnToAsync => fn => arr =>
 export const mergeObjects = arr =>
   arr.length === 0 ? {} : Object.assign({}, ...arr);
 
-export const log = data => {
-  console.log(`<${typeof data}>`, data);
+export const log = tag => data => {
+  console.log(`${tag}: <${typeof data}>`, data);
   return data;
 };
 
@@ -38,3 +37,5 @@ export const log = data => {
 export const intoObj = data =>
   pipe(data)(map(([k, v]) => ({ [k]: v })), mergeObjects);
 // pipe(data)(reduce((acc, [k, v]) => ({ ...acc, [k]: v }), {}));
+
+export const flatten = reduce((acc, arr) => acc.concat(arr), []);
