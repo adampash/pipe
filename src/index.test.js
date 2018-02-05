@@ -1,4 +1,13 @@
-import { pipe, map, objToArr, intoObj } from './index';
+import {
+  pipe,
+  filter,
+  map,
+  objToArr,
+  intoObj,
+  reduce,
+  collectComposable,
+  compose,
+} from './index';
 
 const add = x => y => x + y;
 const add1 = add(1);
@@ -58,5 +67,69 @@ describe('intoObj', () => {
     };
 
     expect(intoObj(data)).toEqual(expected);
+  });
+});
+
+describe('optimized mapping', () => {
+  it('runs threw fewer times', () => {
+    const addN = n => map(num => num + n);
+    const addFns = [...new Array(100)].map((_, i) => i).map(n => addN(n));
+    const data = [1, 2, 3, 4, 5];
+    const result = pipe.stream(data)(
+      ...addFns,
+      filter(n => n % 2 === 0),
+      ...addFns,
+      reduce((acc, n) => acc + n, 0),
+      n => n + 1
+    );
+    expect(result).toEqual(19807);
+  });
+});
+
+describe('composition', () => {
+  it('composes maps', () => {
+    const data = [1, 2, 3, 4, 5];
+    const result = compose(map(n => n + 1), reduce((acc, n) => acc + n, 0))(
+      data
+    );
+    expect(result).toEqual(20);
+  });
+});
+
+describe('collectComposable', () => {
+  it('collects functions that can be composed together', () => {
+    const fn1 = {
+      __COMPOSABLE_PIPE__: true,
+      num: 1,
+    };
+    const fn2 = {
+      __COMPOSABLE_PIPE__: true,
+      num: 2,
+    };
+    const fn3 = {
+      __COMPOSABLE_PIPE__: false,
+      num: 3,
+    };
+    const fn4 = {
+      __COMPOSABLE_PIPE__: true,
+      num: 4,
+    };
+    const fn5 = {
+      __COMPOSABLE_PIPE__: false,
+      num: 5,
+    };
+    const fn6 = {
+      __COMPOSABLE_PIPE__: false,
+      num: 6,
+    };
+    const fn7 = {
+      __COMPOSABLE_PIPE__: false,
+      num: 7,
+    };
+
+    const expected = [[fn1, fn2, fn3], [fn4, fn5], fn6, fn7];
+    expect(collectComposable([fn1, fn2, fn3, fn4, fn5, fn6, fn7])).toEqual(
+      expected
+    );
   });
 });
