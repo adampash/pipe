@@ -34,8 +34,6 @@ export const collectComposable = fns => {
       }
       acc.push(fn);
       return acc;
-    } else if (isLastFnComposable(acc)) {
-      return mergeIntoAcc(acc, fn);
     }
 
     // Not composable type and last function was not composable
@@ -45,14 +43,18 @@ export const collectComposable = fns => {
   return result;
 };
 
+// export const pipe = () => {};
 export const pipe = data => (...fns) =>
   fns.reduce((acc, fn) => (typeof fn === 'function' ? fn(acc) : acc), data);
 
 pipe.stream = data => (...fns) => {
   const composableCollections = collectComposable(fns);
   const composedFns = composableCollections.map(
-    // eslint-disable-next-line no-use-before-define
-    fnOrArray => (Array.isArray(fnOrArray) ? compose(...fnOrArray) : fnOrArray)
+    fnOrArray =>
+      Array.isArray(fnOrArray)
+        ? // eslint-disable-next-line no-use-before-define
+          map(compose(...fnOrArray.map(map => map.fn)))
+        : fnOrArray
   );
 
   return composedFns.reduce(
@@ -75,7 +77,6 @@ const asyncify = fnToAsync => fn => arr =>
 export const filter = fn => arr => arr.filter(fn);
 export const map = fn => {
   const mapFn = arr => arr.map(fn);
-  mapFn.foo = 'bar';
   mapFn.__COMPOSABLE_PIPE__ = true;
   mapFn.fn = fn;
   return mapFn;

@@ -84,6 +84,51 @@ describe('optimized mapping', () => {
     );
     expect(result).toEqual(19807);
   });
+  it('tests optimization', () => {
+    const bigArr = [...new Array(100000)].map((_, i) => i);
+    bigArr.map(n => n + 100);
+    console.time('One fun');
+    pipe(bigArr)(map(n => n + 1));
+    console.timeEnd('One fun');
+    console.time('One fun');
+    pipe(bigArr)(map(n => n + 1));
+    console.timeEnd('One fun');
+    console.time('Optimized');
+    const result2 = pipe.stream(bigArr)(
+      map(n => n + 1),
+      map(n => n * 321),
+      map(n => n / 2),
+      map(n => n / 2),
+      map(n => n / 2),
+      map(n => n / 2),
+      map(n => n / 2),
+      map(n => n / 2),
+      filter(n => n % 2 === 0),
+      map(n => n + 2),
+      reduce((acc, n) => acc + n, 0)
+    );
+    console.timeEnd('Optimized');
+    console.time('No optimization');
+    const result1 = pipe(bigArr)(
+      map(n => n + 1),
+      map(n => n * 321),
+      map(n => n / 2),
+      map(n => n / 2),
+      map(n => n / 2),
+      map(n => n / 2),
+      map(n => n / 2),
+      map(n => n / 2),
+      filter(n => n % 2 === 0),
+      map(n => n + 2),
+      reduce((acc, n) => acc + n, 0)
+    );
+    console.timeEnd('No optimization');
+
+    console.log(`result2`, result2);
+    console.log(`result1`, result1);
+
+    expect(result1).toEqual(result2);
+  });
 });
 
 describe('composition', () => {
@@ -119,15 +164,15 @@ describe('collectComposable', () => {
       num: 5,
     };
     const fn6 = {
-      __COMPOSABLE_PIPE__: false,
+      __COMPOSABLE_PIPE__: true,
       num: 6,
     };
     const fn7 = {
-      __COMPOSABLE_PIPE__: false,
+      __COMPOSABLE_PIPE__: true,
       num: 7,
     };
 
-    const expected = [[fn1, fn2, fn3], [fn4, fn5], fn6, fn7];
+    const expected = [[fn1, fn2], fn3, fn4, fn5, [fn6, fn7]];
     expect(collectComposable([fn1, fn2, fn3, fn4, fn5, fn6, fn7])).toEqual(
       expected
     );
